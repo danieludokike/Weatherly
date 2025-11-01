@@ -21,6 +21,6 @@ class LocationService:
                 raise ValueError(f"Location lookup failed: {data.get('message')}")
         except Exception as e:
             print("Location detection failed:", e)
-            # fallback to a Madrid
+            # fallback to a Madrid if detection fails
             return "Madrid", 40.4168, -3.7038
 
