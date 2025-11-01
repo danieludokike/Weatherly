@@ -34,33 +34,6 @@ The **Search** button changes to **“Loading…”** while data is being fetche
 Organized into `core` and `ui` layers for clean separation of logic, services, and presentation.
 
 
-## Project Structure
-
-Weatherly/
-│
-├── main.py # Entry point of the app
-├── .env # Environment variables (API key, etc.)
-├── assets/
-│
-├── core/
-│ ├── init.py
-│ ├── config.py # Loads API key and URLs
-│ ├── weather_service.py # Handles API calls and data parsing
-│ ├── location_service.py # Detects current user location
-│ └── models.py # Dataclasses for weather data
-│
-├── ui/
-│ ├── init.py
-│ ├── main_window.py # Main UI layout and logic
-│ ├── widgets/
-│ │ ├── init.py
-│ │ └── hourly_widget.py # Small component for hourly weather
-│ └── styles/
-│ └── dark_theme.qss # App stylesheet
-│
-└── README.md
-
-
 ## Installation & Setup
 
 ### 1. Clone the Repository
