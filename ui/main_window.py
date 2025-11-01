@@ -1,9 +1,11 @@
-
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QLabel,
     QListWidget, QListWidgetItem, QFrame, QMessageBox
 )
 from PySide6.QtCore import Qt, QThread, Signal, QSize
+from PySide6.QtGui import QMovie
+import os
+
 from core.weather_service import WeatherService
 from ui.widgets.hourly_widget import HourlyWidget
 
@@ -29,7 +31,8 @@ class MainWindow(QWidget):
         super().__init__()
         self.setWindowTitle("Weatherly")
         self.setMinimumSize(1100, 650)
-        self.thread = None 
+        self.thread = None
+        self._loader_movie = None
         self._build_ui()
 
         try:
@@ -75,6 +78,31 @@ class MainWindow(QWidget):
         self.search_button.setFixedHeight(40)
         top_row.addWidget(self.search)
         top_row.addWidget(self.search_button)
+
+        # Loader (spinner gif or text) placed next to the search button
+        self.loader_label = QLabel()
+        self.loader_label.setVisible(False)   # hidden initially
+        self.loader_label.setFixedSize(32, 32)
+
+        # Resolve spinner path relative to project root / assets/spinner.gif
+        # we start from this file location and move up to project root
+        spinner_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "..", "assets", "spinner.gif"))
+        if os.path.exists(spinner_path):
+            try:
+                movie = QMovie(spinner_path)
+                movie.setScaledSize(self.loader_label.size())
+                self.loader_label.setMovie(movie)
+                self._loader_movie = movie
+            except Exception:
+                # fallback to text if QMovie fails for any reason
+                self.loader_label.setText("Loading...")
+                self.loader_label.setStyleSheet("color: #cbd5e1; padding-left:6px;")
+        else:
+            # fallback: simple text loader
+            self.loader_label.setText("Loading...")
+            self.loader_label.setStyleSheet("color: #cbd5e1; padding-left:6px;")
+
+        top_row.addWidget(self.loader_label)
         center_container.addLayout(top_row)
 
         # Big Card
@@ -161,6 +189,8 @@ class MainWindow(QWidget):
             print("Fetch already in progress — ignoring.")
             return
 
+        # Show loader + disable controls
+        self._show_loader(True)
         self.search.setEnabled(False)
         self.search_button.setEnabled(False)
         self.search.setPlaceholderText("Fetching...")
@@ -180,9 +210,13 @@ class MainWindow(QWidget):
 
     def _on_fetch_error(self, msg):
         print("Error fetching weather:", msg)
+        # stop loader before showing error dialog
+        self._show_loader(False)
         QMessageBox.warning(self, "Weather Error", msg)
 
     def _on_fetch_finished(self):
+        # stop loader + re-enable controls
+        self._show_loader(False)
         self.search.setEnabled(True)
         self.search_button.setEnabled(True)
         self.search.setPlaceholderText("Search for cities")
@@ -191,6 +225,23 @@ class MainWindow(QWidget):
             self.thread = None
 
     # ---------------------- Helpers ----------------------
+    def _show_loader(self, enable: bool):
+        """Show or hide the loader. If a QMovie is set, start/stop it."""
+        if enable:
+            self.loader_label.setVisible(True)
+            if hasattr(self, "_loader_movie") and self._loader_movie is not None:
+                try:
+                    self._loader_movie.start()
+                except Exception:
+                    pass
+        else:
+            if hasattr(self, "_loader_movie") and self._loader_movie is not None:
+                try:
+                    self._loader_movie.stop()
+                except Exception:
+                    pass
+            self.loader_label.setVisible(False)
+
     def _map_icon(self, description_or_code):
         m = {
             "01d": "☀️", "01n": "🌙", "02d": "🌤", "03d": "⛅",
