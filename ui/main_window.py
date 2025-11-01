@@ -1,3 +1,4 @@
+
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QLabel,
     QListWidget, QListWidgetItem, QFrame, QMessageBox
@@ -194,7 +195,7 @@ class MainWindow(QWidget):
             self.thread.deleteLater()
             self.thread = None
 
-    # ---------------------- Helpers ----------------------
+    # ---------------------- Icon Helpers ----------------------
     def _map_icon(self, description_or_code):
         m = {
             "01d": "☀️", "01n": "🌙", "02d": "🌤", "03d": "⛅",

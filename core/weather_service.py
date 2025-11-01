@@ -1,4 +1,4 @@
-# core/weather_service.py
+
 import requests
 import time
 from collections import defaultdict, Counter
@@ -17,7 +17,7 @@ class WeatherService:
         if not API_KEY:
             raise ValueError("Missing API_KEY (check .env and core/config.py)")
 
-        # Build request
+        # Build request params
         params = {
             "q": city,
             "appid": API_KEY,
@@ -35,10 +35,8 @@ class WeatherService:
         except ValueError:
             raise ValueError("Invalid JSON response from weather API")
 
-        # Handle API-level errors
-        # OpenWeatherMap sometimes returns {"cod":"401", "message":"..."} (cod as str)
         if r.status_code != 200:
-            # try to extract message from payload
+            # extract message from payload
             msg = data.get("message") if isinstance(data, dict) else f"HTTP {r.status_code}"
             raise ValueError(f"Weather API error: {msg}")
 
@@ -79,7 +77,7 @@ class WeatherService:
                 start_index = idx
                 break
 
-        # Choose up to 7 items starting from start_index (these are 3-hourly points)
+        # --- Choose up to 7 items starting from start_index (these are 3-hourly points) ---
         for h in forecast_list[start_index:start_index + 7]:
             ts = h.get("dt", int(time.time()))
             hourly.append(HourlyForecast(
@@ -110,7 +108,7 @@ class WeatherService:
         daily = []
         for day_key in days_sorted[:7]:
             info = daily_map[day_key]
-            # choose the most common icon in that day's entries (fallback to first)
+            # icons mapping: take the most common icon for the day
             icon = None
             if info["icons"]:
                 icon = Counter(info["icons"]).most_common(1)[0][0]
@@ -133,7 +131,7 @@ class WeatherService:
         return CityWeather(
             city=city_name,
             current_temp=current_temp,
-            rain_chance=0,   # forecast endpoint provides 'pop' in each list item; you can compute if desired
+            rain_chance=0,   
             icon=current_icon,
             hourly=hourly,
             daily=daily
