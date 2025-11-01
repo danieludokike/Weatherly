@@ -4,6 +4,7 @@
 **Weatherly** is a modern, elegant desktop weather application built with **Python** and **PySide6 (Qt for Python)**.  
 It fetches real-time weather and forecast data using the **OpenWeatherMap API**, automatically detects your current location, and provides a sleek, responsive UI that feels professional and fast.
 
+<img width="829" height="502" alt="img" src="https://github.com/user-attachments/assets/20c48b01-291f-480f-b9df-fc2e37c22cc8" />
 
 ## Features
 
